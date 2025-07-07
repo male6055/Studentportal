@@ -1,0 +1,235 @@
+body {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #222121;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.first {
+  display: flex;
+  flex-direction: column; 
+  gap: 10px;
+  width: 500px;
+  padding: 40px;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(234,224,224,0.1);
+  border-radius: 15px;
+  /* backdrop-filter: blur(8px); */
+  /* box-shadow: 0 8px 24px rgba(209, 209, 209, 0.4); */
+  color: rgb(160, 16, 16);
+}
+
+.main-container {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  padding: 40px;
+  border-radius: 20px;
+  background-color: rgba(234, 224, 224, 0.1);
+  /* backdrop-filter: blur(10px); */
+  /* box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); */
+  position: relative;
+}
+
+.first,
+.right-side {
+  padding: 40px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Style the left (login) side */
+.first {
+  min-width: 300px;
+  color: #ffffff;
+}
+
+.first input,
+.first button {
+  width: 100%;
+}
+
+.root{
+  background-color: #222121;
+}
+
+.right-side {
+  min-width: 250px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.first input {
+  width: 350px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+.first button.b1 {
+  width: 150px;
+  padding: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.first button.b1:hover {
+  background-color: #f4a0a0;
+  color: #000000;
+}
+
+.right-side button.b2 {
+  width: 150px;
+  padding: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.right-side button.b2:hover {
+  background-color: #f4a0a0;
+  color: #000000;
+}
+
+.signupform {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 350px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* --- Add this inside your <style> tag in App.js --- */
+
+.login-message {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #dc3545; /* Default to red for errors */
+}
+.login-message.success {
+    color: #28a745; /* Green for success */
+}
+
+
+.signup-form-container {
+    display: flex;
+  flex-direction: column; 
+  gap: 10px;
+  width: 500px;
+  padding: 40px;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(234,224,224,0.1);
+  border-radius: 15px;
+  /* backdrop-filter: blur(8px); */
+  /* box-shadow: 0 8px 24px rgba(209, 209, 209, 0.4); */
+  color: rgb(255, 255, 255);
+}
+
+.signup-form-container button.b1 {
+  width: 150px;
+  padding: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signup-form-container button.b1:hover {
+  background-color: #f4a0a0;
+  color: #000000;
+}
+
+.signup-form-container button.b2 {
+  width: 150px;
+  padding: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.signup-form-container button.b2:hover {
+  background-color: #f4a0a0;
+  color: #000000;
+}
+
+.signup-form-container input {
+  width: 350px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+.signup-message {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #dc3545; /* Default to red for errors */
+}
+.signup-message.success {
+    color: #28a745; /* Green for success */
+}
+
+/* Ensure main-container can accommodate the new form */
+@media (min-width: 768px) {
+    .main-container {
+        /* Adjust gap or width if needed to fit three columns (login, signup button, signup form) */
+        /* For now, it will stack the signup form below the login/signup buttons */
+        flex-wrap: wrap; /* Allow items to wrap to next line */
+        justify-content: center; /* Center items when they wrap */
+    }
+}
+
+.buttons{
+  display: flex;
+  flex-direction: rows;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
