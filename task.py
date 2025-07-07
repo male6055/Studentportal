@@ -87,7 +87,6 @@ def del_students(name):
     conn.close()
     return jsonify({'message':' Deleted'}),200
 ### auth
-# --- Add this new route to your app.py ---
 
 @app.route('/login', methods=['POST'])
 def login_user():
@@ -137,11 +136,6 @@ def login_user():
     except Exception as e:
         return jsonify({'error': 'Unexpected server error during login', 'details': str(e)}), 500
 
-# --- End of new route ---
-
-### courses
-
-
 
 @app.route('/courses', methods=['GET'])
 def get_all_courses(): # Renamed function for clarity
@@ -176,9 +170,6 @@ def get_all_courses(): # Renamed function for clarity
         if conn:
             conn.close() # Ensure the database connection is closed
 
-from flask import request, jsonify # Ensure request is imported
-
-# ... (your existing imports and other code) ...
 
 @app.route('/courses', methods=['POST'])
 def create_course():
