@@ -77,13 +77,12 @@ def add_student():
     except Exception as e:
         return jsonify({'error': 'Insert failed', 'details': str(e)}), 500
 
-@app.route('/students/<int:name>', methods = ['DELETE'])
-def del_students(name):
+@app.route('/students/<int:id>', methods = ['DELETE'])
+def del_students(id):
     conn = connection()
     cursor = conn.cursor()
-    cursor.execute('DELETE from Students where stdid=?',(name,))
+    cursor.execute('DELETE from Students where stdid=?',(id,))
     conn.commit()
-    print(conn)
     conn.close()
     return jsonify({'message':' Deleted'}),200
 ### auth
@@ -209,6 +208,16 @@ def create_course():
     finally:
         if conn:
             conn.close() # Ensure connection is closed
+
+@app.route('/courses/<int:id>', methods = ['DELETE'])
+def del_courses(id):
+    conn = connection()
+    cursor = conn.cursor()
+    cursor.execute( "DELETE from Courses where Courseid = ?",(id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message':'Deleted'}),200
+
 
 
 if __name__ == '__main__':

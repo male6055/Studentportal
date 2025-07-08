@@ -23,12 +23,10 @@ export const loginUser = (email, password) => {
 // };
 
 // --- If you have a separate postapi.js file, add this export there: ---
+
 export const addStudent = (fullname, email, password) => {
     // The Flask endpoint expects 'name' for fullname
     return api.post('/students', { name: fullname, email, password });
 };
 
-// --- If your API helper is integrated directly into App.js, add it like this: ---
-// (Assuming 'api' axios instance is already defined)
-// Example:
-// export const loginUser = (email, password) => { /* ... */ }; // Existing
+
