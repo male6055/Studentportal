@@ -1,9 +1,29 @@
 from flask import Flask, jsonify,request
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
 from flask_cors import CORS
 import pyodbc
 
 app = Flask(__name__)
 CORS(app)
+
+app.config["JWT_SECRET_KEY"] = "789456123studentportal"  #  random key in production
+jwt = JWTManager(app)
+
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return jsonify({"msg": "Missing Authorization Header or Token"}), 401
+
+@jwt.invalid_token_loader
+def invalid_token_response(callback):
+    return jsonify({"msg": "Signature verification failed"}), 403
+
+@jwt.expired_token_loader
+def expired_token_response(callback):
+    return jsonify({"msg": "Token has expired"}), 401
+
+@jwt.revoked_token_loader
+def revoked_token_response(callback):
+    return jsonify({"msg": "Token has been revoked"}), 401
 
 app.config['CONNECTIONSTRING'] = (
     "DRIVER=SQL Server;"
@@ -87,11 +107,13 @@ def del_students(id):
     return jsonify({'message':' Deleted'}),200
 ### auth
 
+# ... (existing imports and JWT setup)
+
 @app.route('/login', methods=['POST'])
 def login_user():
     """
     Authenticates a user based on provided email and password.
-    Returns success message if credentials are valid, otherwise an error.
+    Returns a JWT if credentials are valid, otherwise an error.
     """
     try:
         data = request.get_json()
@@ -117,10 +139,13 @@ def login_user():
         conn.close()
 
         if user:
-            # User found, login successful
+            # User found, login successful. Create an access token.
+            # The identity here will be the `stdid` which we'll retrieve later with get_jwt_identity()
+            access_token = create_access_token(identity=user[0]) # Use stdid as the identity
             return jsonify({
                 "message": "Login successful",
-                "user": {
+                "access_token": access_token, # Send the JWT back to the client
+                "user": { # Optionally send basic user info too
                     "stdid": user[0],
                     "fullname": user[1],
                     "email": user[2]
@@ -217,6 +242,73 @@ def del_courses(id):
     conn.commit()
     conn.close()
     return jsonify({'message':'Deleted'}),200
+
+
+# ... (existing imports, JWT setup, and other routes)
+
+@app.route('/student/dashboard', methods=['GET'])
+@jwt_required() # This decorator protects the route
+def get_student_dashboard_info():
+    """
+    Retrieves the logged-in student's details and their enrolled courses.
+    Requires a valid JWT in the Authorization header.
+    """
+    current_student_id = get_jwt_identity() # Get the student ID from the JWT
+
+    conn = None
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+
+        # Query to get student's basic information
+        cursor.execute("SELECT stdid, fullname, email FROM Students WHERE stdid = ?", current_student_id)
+        student_info = cursor.fetchone()
+
+        if not student_info:
+            return jsonify({"error": "Student not found."}), 404
+
+        student_data = {
+            "stdid": student_info[0],
+            "fullname": student_info[1],
+            "email": student_info[2],
+            "courses": [] # Initialize an empty list for courses
+        }
+
+        # Query to get courses for the specific student
+        # Assuming you have a StudentCourses (or Enrollments) table linking Students and Courses
+        # Adjust the query based on your actual table names and column names
+        course_query = """
+        SELECT
+            C.CourseId,
+            C.coursecode,
+            C.coursename,
+            C.description
+        FROM
+            Courses C
+        JOIN
+            StudentCourses SC ON C.CourseId = SC.CourseId
+        WHERE
+            SC.stdid = ?
+        """
+        cursor.execute(course_query, current_student_id)
+        course_rows = cursor.fetchall()
+
+        # Append courses to the student_data dictionary
+        course_columns = [column[0] for column in cursor.description]
+        for row in course_rows:
+            student_data["courses"].append(dict(zip(course_columns, row)))
+
+        return jsonify(student_data), 200
+
+    except pyodbc.Error as ex:
+        return jsonify({'error': 'Database query failed', 'details': str(ex)}), 500
+    except Exception as e:
+        return jsonify({'error': 'Unexpected server error', 'details': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
 
 
 
