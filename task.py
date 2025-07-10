@@ -6,7 +6,7 @@ import pyodbc
 app = Flask(__name__)
 CORS(app)
 
-app.config["JWT_SECRET_KEY"] = "test"  #  random key in production
+app.config["JWT_SECRET_KEY"] = "test"
 jwt = JWTManager(app)
 
 @jwt.unauthorized_loader
@@ -43,22 +43,22 @@ def connectionstring():
 @app.route('/students', methods=['GET'])
 def get_students():
     try:
-        # Step 1: Attempt DB connection
+        #  DB connection
         try:
             conn = connectionstring()
         except pyodbc.InterfaceError as e:
             return jsonify({"error": "Database connection failed", "details": str(e)}), 500
 
-        # Step 2: Execute query
+        # Execute query
         try:
             cursor = conn.cursor()
-            cursor.execute("SELECT stdid, fullname, email FROM Students")  # safer to include ID
+            cursor.execute("SELECT stdid, fullname, email FROM Students")
             rows = cursor.fetchall()
         except Exception as e:
             conn.close()
             return jsonify({"error": "Query failed", "details": str(e)}), 500
 
-        # Step 3: Convert results to list of dicts
+        # Convert results to list of dicts
         students = []
         for column in rows:
             try:
@@ -73,7 +73,7 @@ def get_students():
 
         conn.close()
 
-        # Step 4: Return response
+        #  Return response
         if not students:
             return jsonify({"message": "No students found"}), 200
         return jsonify(students), 200
@@ -109,9 +109,7 @@ def del_students(id):
     conn.commit()
     conn.close()
     return jsonify({'message':' Deleted'}),200
-### auth
 
-# ... (existing imports and JWT setup)
 
 @app.route('/login', methods=['POST'])
 def login_user():
@@ -170,9 +168,9 @@ def login_user():
 
 @app.route('/courses', methods=['GET'])
 def get_all_courses():
-    """
-    Retrieves all courses from the Courses table.
-    """
+
+    #Retrieves all courses from the Courses table.
+
     conn = None # Initialize conn to None for finally block
     try:
         conn = connectionstring()
