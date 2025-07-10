@@ -141,6 +141,8 @@ def login_user():
         if user:
             # User found, login successful. Create an access token.
             # The identity here will be the `stdid` which we'll retrieve later with get_jwt_identity()
+            print(f"User found for login: ID={user[0]}, Fullname={user[1]}, Email={user[2]}", flush=True)
+
             access_token = create_access_token(identity=user[0]) # Use stdid as the identity
 
             return jsonify({
@@ -248,14 +250,15 @@ def del_courses(id):
 # ... (existing imports, JWT setup, and other routes)
 
 @app.route('/student/dashboard', methods=['GET'])
-@jwt_required() # This decorator protects the route
+# @jwt_required() # This decorator protects the route
 def get_student_dashboard_info():
     """
     Retrieves the logged-in student's details and their enrolled courses.
     Requires a valid JWT in the Authorization header.
     """
+    print("Reached /student/dashboard route", flush=True)
     current_student_id = get_jwt_identity() # Get the student ID from the JWT
-    print(current_student_id)
+    print(f"Current student ID from JWT: {current_student_id}", flush=True)
 
     conn = None
     try:
@@ -265,6 +268,7 @@ def get_student_dashboard_info():
         # Query to get student's basic information
         cursor.execute("SELECT stdid, fullname, email FROM Students WHERE stdid = ?", (current_student_id,))
         student_info = cursor.fetchone()
+        print(f"Student info fetched: {student_info}", flush=True)
 
         if not student_info:
             return jsonify({"error": "Student not found."}), 404
