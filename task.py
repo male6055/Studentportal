@@ -26,13 +26,13 @@ def revoked_token_response(callback):
     return jsonify({"msg": "Token has been revoked"}), 401
 
 app.config['CONNECTIONSTRING'] = (
-    "DRIVER=SQL Server;"
+    "DRIVER={SQL Server};"
     "SERVER=DESKTOP-TB42104;"
     "DATABASE=studentportal;"
     "Trusted_Connection=yes;"
 )
 
-def connection():
+def connectionstring():
     return pyodbc.connect(app.config['CONNECTIONSTRING'])
 
 
@@ -41,7 +41,7 @@ def get_students():
     try:
         # Step 1: Attempt DB connection
         try:
-            conn = connection()
+            conn = connectionstring()
         except pyodbc.InterfaceError as e:
             return jsonify({"error": "Database connection failed", "details": str(e)}), 500
 
@@ -85,7 +85,7 @@ def add_student():
         if not data:
             return jsonify({'error': 'Missing JSON payload'}), 400
 
-        conn = connection()
+        conn = connectionstring()
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO Students ( fullname, email, password) VALUES ( ?, ?, ?)",
@@ -99,7 +99,7 @@ def add_student():
 
 @app.route('/students/<int:id>', methods = ['DELETE'])
 def del_students(id):
-    conn = connection()
+    conn = connectionstring()
     cursor = conn.cursor()
     cursor.execute('DELETE from Students where stdid=?',(id,))
     conn.commit()
@@ -126,7 +126,7 @@ def login_user():
         email = data['email']
         password = data['password']
 
-        conn = connection()
+        conn = connectionstring()
         cursor = conn.cursor()
         # IMPORTANT: In a real application, NEVER store plain text passwords.
         # Use a strong hashing algorithm (e.g., bcrypt) for passwords.
@@ -142,6 +142,7 @@ def login_user():
             # User found, login successful. Create an access token.
             # The identity here will be the `stdid` which we'll retrieve later with get_jwt_identity()
             access_token = create_access_token(identity=user[0]) # Use stdid as the identity
+
             return jsonify({
                 "message": "Login successful",
                 "access_token": access_token, # Send the JWT back to the client
@@ -168,7 +169,7 @@ def get_all_courses(): # Renamed function for clarity
     """
     conn = None # Initialize conn to None for finally block
     try:
-        conn = connection() # Establish database connection
+        conn = connectionstring() # Establish database connection
         cursor = conn.cursor() # Create a cursor object
 
         # Execute the SELECT query to get all courses
@@ -213,7 +214,7 @@ def create_course():
         if not course_code or not course_name:
             return jsonify({"error": "Course code and course name are required."}), 400
 
-        conn = connection() # Assuming connection() function is defined elsewhere
+        conn = connectionstring() # Assuming connection() function is defined elsewhere
         cursor = conn.cursor()
 
         # SQL INSERT statement
@@ -236,7 +237,7 @@ def create_course():
 
 @app.route('/courses/<int:id>', methods = ['DELETE'])
 def del_courses(id):
-    conn = connection()
+    conn = connectionstring()
     cursor = conn.cursor()
     cursor.execute( "DELETE from Courses where Courseid = ?",(id,))
     conn.commit()
@@ -254,14 +255,15 @@ def get_student_dashboard_info():
     Requires a valid JWT in the Authorization header.
     """
     current_student_id = get_jwt_identity() # Get the student ID from the JWT
+    print(current_student_id)
 
     conn = None
     try:
-        conn = connection()
+        conn = connectionstring()
         cursor = conn.cursor()
 
         # Query to get student's basic information
-        cursor.execute("SELECT stdid, fullname, email FROM Students WHERE stdid = ?", current_student_id)
+        cursor.execute("SELECT stdid, fullname, email FROM Students WHERE stdid = ?", (current_student_id,))
         student_info = cursor.fetchone()
 
         if not student_info:
@@ -290,7 +292,7 @@ def get_student_dashboard_info():
         WHERE
             SC.stdid = ?
         """
-        cursor.execute(course_query, current_student_id)
+        cursor.execute(course_query, (current_student_id,))
         course_rows = cursor.fetchall()
 
         # Append courses to the student_data dictionary
@@ -311,6 +313,5 @@ def get_student_dashboard_info():
 
 
 
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="127.0.0.1",debug=True)
