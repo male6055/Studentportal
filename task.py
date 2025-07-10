@@ -6,23 +6,27 @@ import pyodbc
 app = Flask(__name__)
 CORS(app)
 
-app.config["JWT_SECRET_KEY"] = "789456123studentportal"  #  random key in production
+app.config["JWT_SECRET_KEY"] = "test"  #  random key in production
 jwt = JWTManager(app)
 
 @jwt.unauthorized_loader
 def unauthorized_response(callback):
+    print("DEBUG: JWT unauthorized_loader triggered (Missing Authorization Header or Token)", flush=True)
     return jsonify({"msg": "Missing Authorization Header or Token"}), 401
 
 @jwt.invalid_token_loader
 def invalid_token_response(callback):
+    print("DEBUG: JWT invalid_token_loader triggered (Signature verification failed)", flush=True)
     return jsonify({"msg": "Signature verification failed"}), 403
 
 @jwt.expired_token_loader
 def expired_token_response(callback):
+    print("DEBUG: JWT expired_token_loader triggered (Token has expired)", flush=True)
     return jsonify({"msg": "Token has expired"}), 401
 
 @jwt.revoked_token_loader
 def revoked_token_response(callback):
+    print("DEBUG: JWT revoked_token_loader triggered (Token has been revoked)", flush=True)
     return jsonify({"msg": "Token has been revoked"}), 401
 
 app.config['CONNECTIONSTRING'] = (
@@ -137,11 +141,11 @@ def login_user():
         )
         user = cursor.fetchone() # Fetch one matching row
         conn.close()
-
+        print(f"User found for login: ID={user[0]}, Fullname={user[1]}, Email={user[2]}", flush=True)
         if user:
             # User found, login successful. Create an access token.
             # The identity here will be the `stdid` which we'll retrieve later with get_jwt_identity()
-            print(f"User found for login: ID={user[0]}, Fullname={user[1]}, Email={user[2]}", flush=True)
+
 
             access_token = create_access_token(identity=user[0]) # Use stdid as the identity
 
@@ -250,7 +254,7 @@ def del_courses(id):
 # ... (existing imports, JWT setup, and other routes)
 
 @app.route('/student/dashboard', methods=['GET'])
-# @jwt_required() # This decorator protects the route
+@jwt_required() # This decorator protects the route
 def get_student_dashboard_info():
     """
     Retrieves the logged-in student's details and their enrolled courses.
@@ -313,6 +317,7 @@ def get_student_dashboard_info():
     finally:
         if conn:
             conn.close()
+
 
 
 

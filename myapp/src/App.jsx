@@ -1,20 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { getpost, loginUser, addStudent } from "./api/postapi"; // Import all API functions
-import StudentDashboard from "./studentdashboard"; // Import the new dashboard component
+import { getpost, loginUser, addStudent } from "./api/postapi"; 
+import StudentDashboard from "./studentdashboard"; 
 import "./App.css";
 
 const App = () => {
     const [init, setInit] = useState(false);
-// loggedInUser will be null if not logged in, or an object if logged in.
-// Initialize by checking localStorage for a token.
 const [loggedInUser, setLoggedInUser] = useState(() => {
     const token = localStorage.getItem('accessToken');
-    // If a token exists, assume logged in for now. StudentDashboard will verify it.
     return token ? { stdid: 'checking', fullname: 'Loading...', email: 'loading...' } : null;
 });
-const [showSignUpForm, setShowSignUpForm] = useState(false); // This line was already there, ensure it's below loggedInUser
+const [showSignUpForm, setShowSignUpForm] = useState(false); 
 
     // Particles initialization
     useEffect(() => {
@@ -39,9 +36,9 @@ const [showSignUpForm, setShowSignUpForm] = useState(false); // This line was al
         console.log("handleSignIn: Starting login process..."); // Debug log 1
         try {
             const res = await loginUser(loginEmail, loginPassword);
-            console.log("handleSignIn: Login API call successful. Response data:", res.data); // Debug log 2
+            console.log("handleSignIn: Login API call successful. Response data:"); // Debug log 2
             
-            // Check if access_token exists in the response data
+            //  if access_token exists in the response data
             if (res.data && res.data.access_token) {
                 console.log("handleSignIn: Access token found in response. Storing in localStorage..."); // Debug log 3
                 console.log("handleSignIn: Value of res.data.access_token BEFORE storing:");
@@ -82,22 +79,8 @@ const [showSignUpForm, setShowSignUpForm] = useState(false); // This line was al
         localStorage.removeItem('accessToken'); // Remove JWT from local storage
         setLoggedInUser(null); // Clear logged-in user state
         setLoginMessage('Logged out successfully.'); // Optional: show a message
-        setShowSignUpForm(false); // Ensure we go back to login form
-    }, []); // Empty dependency array means this function is stable
-
-
-
-    // Check for existing token on component mount (for auto-login)
-    // useEffect(() => {
-    //     const token = localStorage.getItem('accessToken');
-    //     if (token) {
-    //         // If a token exists, we assume the user is logged in.
-    //         // The StudentDashboard component will then verify the token by making its own request.
-    //         // For a more robust solution, you might decode the token here or make a quick API call
-    //         // to verify it and fetch user details. For now, we'll just set a placeholder.
-    //         setLoggedInUser({ stdid: 'loading', fullname: 'Loading...', email: 'loading...' });
-    //     }
-    // }, []);
+        setShowSignUpForm(false); 
+    }, []); 
 
 
     // --- Sign-Up State and Handlers ---
@@ -122,7 +105,7 @@ const [showSignUpForm, setShowSignUpForm] = useState(false); // This line was al
             setSignUpEmail('');
             setSignUpPassword('');
             // Optionally, switch back to login form after successful signup
-            // setShowSignUpForm(false);
+            setShowSignUpForm(false);
         } catch (err) {
             console.error("Sign-up error:", err);
             if (err.response && err.response.data && err.response.data.error) {
@@ -215,7 +198,6 @@ const [showSignUpForm, setShowSignUpForm] = useState(false); // This line was al
                     // If loggedInUser is not null, show the StudentDashboard
                     <StudentDashboard onLogout={handleLogout} />
                 ) : (
-                    // Otherwise, show login or signup forms
                     <>
                         {!showSignUpForm && (
                             <div className="first">
