@@ -11,7 +11,7 @@ const StudentDashboard = ({ onLogout }) => {
             setLoading(true);
             setError(null);
             try {
-                const res = await getStudentDashboard();
+                const res =  getStudentDashboard();
                 setStudentData(res.data);
             } catch (err) {
                 console.error("Error fetching student dashboard:", err); // Log the full error object

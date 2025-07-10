@@ -10,6 +10,10 @@ api.interceptors.request.use(
         const token = localStorage.getItem('accessToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+            console.log("Axios Interceptor: Attaching Authorization header:");
+        }
+        else {
+            console.log("Axios Interceptor: No accessToken found in localStorage.");
         }
         return config;
     },
@@ -22,7 +26,7 @@ export const getpost = () => {
     return api.get('/students');
 };
 
-// --- If you have a separate postapi.js file, add this export there: ---
+
 export const loginUser = (email, password) => {
     return api.post('/login', { email, password });
 };

@@ -34,30 +34,47 @@ const [showSignUpForm, setShowSignUpForm] = useState(false); // This line was al
     const [loginPassword, setLoginPassword] = useState('');
     const [loginMessage, setLoginMessage] = useState('');
 
-    const handleSignIn = async () => {
+      const handleSignIn = async () => {
         setLoginMessage('Attempting to log in...');
+        console.log("handleSignIn: Starting login process..."); // Debug log 1
         try {
             const res = await loginUser(loginEmail, loginPassword);
-            console.log("Login response:", res.data);
-            setLoginMessage(res.data.message || "Login successful!");
+            console.log("handleSignIn: Login API call successful. Response data:", res.data); // Debug log 2
+            
+            // Check if access_token exists in the response data
+            if (res.data && res.data.access_token) {
+                console.log("handleSignIn: Access token found in response. Storing in localStorage..."); // Debug log 3
+                console.log("handleSignIn: Value of res.data.access_token BEFORE storing:");
+                localStorage.setItem('accessToken', res.data.access_token);
+                console.log("handleSignIn: Access token stored. Verifying localStorage content..."); // Debug log 4
+                const storedToken = localStorage.getItem('accessToken');
+                console.log("handleSignIn: Token retrieved from localStorage immediately after setting:"); // Debug log 5
 
-            // Store the JWT and user data
-            localStorage.setItem('accessToken', res.data.access_token);
-            setLoggedInUser(res.data.user); // Store basic user info from login response
-            setLoginEmail(''); // Clear form
-            setLoginPassword(''); // Clear form
+                setLoggedInUser(res.data.user);
+                setLoginMessage(res.data.message || "Login successful!");
+                setLoginEmail('');
+                setLoginPassword('');
+                console.log("handleSignIn: Login process completed successfully."); // Debug log 6
+            } else {
+                console.error("handleSignIn: Login API call successful, but no access_token found in response data."); // Debug log 7
+                setLoginMessage("Login successful, but token not received. Please contact support.");
+                setLoggedInUser(null);
+                localStorage.removeItem('accessToken');
+            }
 
         } catch (err) {
-            console.error("Login error:", err);
+            console.error("handleSignIn: Login error caught:", err); // Debug log 8
             if (err.response && err.response.data && err.response.data.error) {
                 setLoginMessage(`Login failed: ${err.response.data.error}`);
             } else {
                 setLoginMessage("Login failed: An unexpected error occurred.");
             }
-            setLoggedInUser(null); // Ensure user is logged out on error
-            localStorage.removeItem('accessToken'); // Clear token on failed login
+            setLoggedInUser(null);
+            localStorage.removeItem('accessToken');
+            console.log("handleSignIn: Login process failed."); // Debug log 9
         }
     };
+    
 
     // Use useCallback to memoize this function, preventing unnecessary re-renders in children
     const handleLogout = useCallback(() => {
