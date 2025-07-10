@@ -132,9 +132,9 @@ def login_user():
 
         conn = connectionstring()
         cursor = conn.cursor()
-        # IMPORTANT: In a real application, NEVER store plain text passwords.
+
         # Use a strong hashing algorithm (e.g., bcrypt) for passwords.
-        # For this example, we're checking against plain text as per your current setup.
+
         cursor.execute(
             "SELECT stdid, fullname, email FROM Students WHERE email = ? AND password = ?",
             (email, password)
@@ -152,7 +152,7 @@ def login_user():
             return jsonify({
                 "message": "Login successful",
                 "access_token": access_token, # Send the JWT back to the client
-                "user": { # Optionally send basic user info too
+                "user": {
                     "stdid": user[0],
                     "fullname": user[1],
                     "email": user[2]
@@ -169,30 +169,26 @@ def login_user():
 
 
 @app.route('/courses', methods=['GET'])
-def get_all_courses(): # Renamed function for clarity
+def get_all_courses():
     """
     Retrieves all courses from the Courses table.
     """
     conn = None # Initialize conn to None for finally block
     try:
-        conn = connectionstring() # Establish database connection
-        cursor = conn.cursor() # Create a cursor object
+        conn = connectionstring()
+        cursor = conn.cursor()
 
-        # Execute the SELECT query to get all courses
+        #  SELECT query to get all courses
         cursor.execute('SELECT CourseId, coursecode, coursename, description FROM Courses')
 
-        # Fetch all results from the query
-        # Fetchall returns a list of tuples, where each tuple is a row
         rows = cursor.fetchall()
 
-        # Get column names from cursor description to create a list of dictionaries
-        # This makes the JSON output more readable (e.g., [{"CourseId": 1, "coursecode": "CS101", ...}])
         columns = [column[0] for column in cursor.description]
         courses = []
         for row in rows:
             courses.append(dict(zip(columns, row)))
 
-        return jsonify(courses), 200 # Return the list of courses as JSON with 200 OK status
+        return jsonify(courses), 200
 
     except Exception as e:
         print(f"Error fetching courses: {e}")
@@ -208,9 +204,9 @@ def create_course():
     Adds a new course to the Courses table.
     Expects JSON data in the request body with 'coursecode', 'coursename', and 'description'.
     """
-    conn = None  # Initialize conn to None for finally block
+    conn = None
     try:
-        data = request.get_json() # Get JSON data from the request body
+        data = request.get_json()
 
         # Validate incoming data
         course_code = data.get('coursecode')
@@ -220,15 +216,13 @@ def create_course():
         if not course_code or not course_name:
             return jsonify({"error": "Course code and course name are required."}), 400
 
-        conn = connectionstring() # Assuming connection() function is defined elsewhere
+        conn = connectionstring()
         cursor = conn.cursor()
 
         # SQL INSERT statement
-        # Using parameterized query to prevent SQL injection
         sql = "INSERT INTO Courses (coursecode, coursename, description) VALUES (?, ?, ?)"
         cursor.execute(sql, (course_code, course_name, description))
-
-        conn.commit() # Commit the transaction to save changes
+        conn.commit()
 
         return jsonify({"message": "Course added successfully!", "coursecode": course_code}), 201
 
@@ -239,7 +233,7 @@ def create_course():
         return jsonify({"error": "Failed to add course.", "details": str(e)}), 500
     finally:
         if conn:
-            conn.close() # Ensure connection is closed
+            conn.close()
 
 @app.route('/courses/<int:id>', methods = ['DELETE'])
 def del_courses(id):
@@ -251,7 +245,7 @@ def del_courses(id):
     return jsonify({'message':'Deleted'}),200
 
 
-# ... (existing imports, JWT setup, and other routes)
+
 
 @app.route('/student/dashboard', methods=['GET'])
 @jwt_required() # This decorator protects the route
@@ -269,7 +263,6 @@ def get_student_dashboard_info():
         conn = connectionstring()
         cursor = conn.cursor()
 
-        # Query to get student's basic information
         cursor.execute("SELECT stdid, fullname, email FROM Students WHERE stdid = ?", (current_student_id,))
         student_info = cursor.fetchone()
         print(f"Student info fetched: {student_info}", flush=True)
@@ -281,12 +274,9 @@ def get_student_dashboard_info():
             "stdid": student_info[0],
             "fullname": student_info[1],
             "email": student_info[2],
-            "courses": [] # Initialize an empty list for courses
+            "courses": []
         }
 
-        # Query to get courses for the specific student
-        # Assuming you have a StudentCourses (or Enrollments) table linking Students and Courses
-        # Adjust the query based on your actual table names and column names
         course_query = """
         SELECT
             C.CourseId,
@@ -317,9 +307,6 @@ def get_student_dashboard_info():
     finally:
         if conn:
             conn.close()
-
-
-
 
 
 if __name__ == '__main__':
