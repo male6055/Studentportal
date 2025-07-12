@@ -9,6 +9,18 @@ CORS(app)
 app.config["JWT_SECRET_KEY"] = "test"
 jwt = JWTManager(app)
 
+@app.before_request
+def log_request_headers():
+    if request.path == '/student/dashboard' and request.method == 'GET':
+        print(f"\n--- Incoming Request to {request.path} ---")
+        for header, value in request.headers.items():
+            # Be careful not to print the full token in production logs
+            if header == 'Authorization':
+                print(f"Header: {header}: {value[:30]}...") # Print partial token
+            else:
+                print(f"Header: {header}: {value}")
+        print("-------------------------------------------\n")
+
 @jwt.unauthorized_loader
 def unauthorized_response(callback):
     print("DEBUG: JWT unauthorized_loader triggered (Missing Authorization Header or Token)", flush=True)
@@ -117,6 +129,7 @@ def login_user():
     Authenticates a user based on provided email and password.
     Returns a JWT if credentials are valid, otherwise an error.
     """
+    print(f"DEBUG: Secret key during token creation: {app.config['JWT_SECRET_KEY']}")
     try:
         data = request.get_json()
 
@@ -252,9 +265,9 @@ def get_student_dashboard_info():
     Retrieves the logged-in student's details and their enrolled courses.
     Requires a valid JWT in the Authorization header.
     """
-    print("Reached /student/dashboard route", flush=True)
+
     current_student_id = get_jwt_identity() # Get the student ID from the JWT
-    print(f"Current student ID from JWT: {current_student_id}", flush=True)
+    print(f"DEBUG: Secret key during token verification: {app.config['JWT_SECRET_KEY']}")
 
     conn = None
     try:

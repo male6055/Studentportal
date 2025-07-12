@@ -41,11 +41,11 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
             //  if access_token exists in the response data
             if (res.data && res.data.access_token) {
                 console.log("handleSignIn: Access token found in response. Storing in localStorage..."); // Debug log 3
-                console.log("handleSignIn: Value of res.data.access_token BEFORE storing:");
+                console.log("handleSignIn: Value of res.data.access_token BEFORE storing:",res.data.access_token); // Debug log 3.1
                 localStorage.setItem('accessToken', res.data.access_token);
                 console.log("handleSignIn: Access token stored. Verifying localStorage content..."); // Debug log 4
                 const storedToken = localStorage.getItem('accessToken');
-                console.log("handleSignIn: Token retrieved from localStorage immediately after setting:"); // Debug log 5
+                console.log("handleSignIn: Token retrieved from localStorage immediately after setting:",storedToken); // Debug log 5
 
                 setLoggedInUser(res.data.user);
                 setLoginMessage(res.data.message || "Login successful!");
