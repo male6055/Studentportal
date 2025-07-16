@@ -1,17 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { getpost, loginUser, addStudent } from "./api/postapi"; 
-import StudentDashboard from "./studentdashboard"; 
+import { getpost, loginUser, addStudent } from "./api/postapi";
+import StudentDashboard from "./StudentDashboard"; // Ensure correct casing and path
 import "./App.css";
 
 const App = () => {
     const [init, setInit] = useState(false);
-const [loggedInUser, setLoggedInUser] = useState(() => {
-    const token = localStorage.getItem('accessToken');
-    return token ? { stdid: 'checking', fullname: 'Loading...', email: 'loading...' } : null;
-});
-const [showSignUpForm, setShowSignUpForm] = useState(false); 
+    const [loggedInUser, setLoggedInUser] = useState(null); // Stores the user object {stdid, fullname, email}
+    const [showSignUpForm, setShowSignUpForm] = useState(false);
 
     // Particles initialization
     useEffect(() => {
@@ -23,65 +20,95 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
     }, []);
 
     const particlesLoaded = (container) => {
-        console.log(container);
+        // console.log(container);
     };
+
+    // --- EFFECT TO CHECK LOCAL STORAGE ON INITIAL LOAD ---
+    useEffect(() => {
+        const storedStudentId = localStorage.getItem('currentStudentId');
+        const storedUserJson = localStorage.getItem('currentUser'); // Optional: if you store full user object
+
+        if (storedStudentId && storedUserJson) {
+            try {
+                const user = JSON.parse(storedUserJson);
+                // Basic validation to ensure it's a valid user object
+                if (user && user.stdid === parseInt(storedStudentId)) {
+                    setLoggedInUser(user);
+                    //console.log("App: Restored user from localStorage:", user);
+                } else {
+                    // Mismatch or invalid stored user, clear it
+                    localStorage.removeItem('currentStudentId');
+                    localStorage.removeItem('currentUser');
+                    console.log("App: Cleared invalid user data from localStorage.");
+                }
+            } catch (e) {
+                console.error("App: Error parsing stored user data:", e);
+                localStorage.removeItem('currentStudentId');
+                localStorage.removeItem('currentUser');
+            }
+        } else if (storedStudentId && !storedUserJson) {
+            // If only stdid is stored, but not the full user object,
+            // you might want to fetch full user details here if needed for display
+            // For now, we'll just set isAuthenticated based on stdid
+            // For this specific setup, we need the full user object for StudentDashboard
+            // So, if only stdid is present, we treat it as not logged in fully.
+            console.log("App: Only stdid found, but no full user object. Treating as not logged in.");
+            localStorage.removeItem('currentStudentId'); // Clear incomplete data
+        }
+    }, []);
 
     // --- Login State and Handlers ---
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [loginMessage, setLoginMessage] = useState('');
 
-      const handleSignIn = async () => {
+    const handleSignIn = async () => {
         setLoginMessage('Attempting to log in...');
-        console.log("handleSignIn: Starting login process..."); // Debug log 1
+        console.log("handleSignIn: Starting login process...");
         try {
             const res = await loginUser(loginEmail, loginPassword);
-            console.log("handleSignIn: Login API call successful. Response data:"); // Debug log 2
-            
-            //  if access_token exists in the response data
-            if (res.data && res.data.access_token) {
-                console.log("handleSignIn: Access token found in response. Storing in localStorage..."); // Debug log 3
-                console.log("handleSignIn: Value of res.data.access_token BEFORE storing:",res.data.access_token); // Debug log 3.1
-                localStorage.setItem('accessToken', res.data.access_token);
-                console.log("handleSignIn: Access token stored. Verifying localStorage content..."); // Debug log 4
-                const storedToken = localStorage.getItem('accessToken');
-                console.log("handleSignIn: Token retrieved from localStorage immediately after setting:",storedToken); // Debug log 5
+            console.log("handleSignIn: Login API call successful. Response data:");
 
-                setLoggedInUser(res.data.user);
+            if (res.data && res.data.user && res.data.user.stdid) {
+                const user = res.data.user;
+                localStorage.setItem('currentStudentId', user.stdid); // Store stdid
+                localStorage.setItem('currentUser', JSON.stringify(user)); // Store full user object
+
+                setLoggedInUser(user); // Set the user object in state
                 setLoginMessage(res.data.message || "Login successful!");
                 setLoginEmail('');
                 setLoginPassword('');
-                console.log("handleSignIn: Login process completed successfully."); // Debug log 6
+                console.log("handleSignIn: Login process completed successfully. User:");
             } else {
-                console.error("handleSignIn: Login API call successful, but no access_token found in response data."); // Debug log 7
-                setLoginMessage("Login successful, but token not received. Please contact support.");
+                console.error("handleSignIn: Login successful but user data/stdid not found in response.");
+                setLoginMessage("Login successful, but user data incomplete. Please contact support.");
                 setLoggedInUser(null);
-                localStorage.removeItem('accessToken');
+                localStorage.removeItem('currentStudentId');
+                localStorage.removeItem('currentUser');
             }
 
         } catch (err) {
-            console.error("handleSignIn: Login error caught:", err); // Debug log 8
+            console.error("handleSignIn: Login error caught:", err);
             if (err.response && err.response.data && err.response.data.error) {
                 setLoginMessage(`Login failed: ${err.response.data.error}`);
             } else {
                 setLoginMessage("Login failed: An unexpected error occurred.");
             }
             setLoggedInUser(null);
-            localStorage.removeItem('accessToken');
-            console.log("handleSignIn: Login process failed."); // Debug log 9
+            localStorage.removeItem('currentStudentId');
+            localStorage.removeItem('currentUser');
+            console.log("handleSignIn: Login process failed.");
         }
     };
-    
 
-    // Use useCallback to memoize this function, preventing unnecessary re-renders in children
     const handleLogout = useCallback(() => {
         console.log("Logging out...");
-        localStorage.removeItem('accessToken'); // Remove JWT from local storage
-        setLoggedInUser(null); // Clear logged-in user state
-        setLoginMessage('Logged out successfully.'); // Optional: show a message
-        setShowSignUpForm(false); 
-    }, []); 
-
+        localStorage.removeItem('currentStudentId'); // Clear the stored ID
+        localStorage.removeItem('currentUser'); // Clear the stored user object
+        setLoggedInUser(null);
+        setLoginMessage('Logged out successfully.');
+        setShowSignUpForm(false);
+    }, []);
 
     // --- Sign-Up State and Handlers ---
     const [signUpFullname, setSignUpFullname] = useState('');
@@ -104,8 +131,7 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
             setSignUpFullname('');
             setSignUpEmail('');
             setSignUpPassword('');
-            // Optionally, switch back to login form after successful signup
-            setShowSignUpForm(false);
+            setShowSignUpForm(false); // Go back to login form after successful signup
         } catch (err) {
             console.error("Sign-up error:", err);
             if (err.response && err.response.data && err.response.data.error) {
@@ -125,7 +151,7 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
                     options={{
                         background: {
                             color: {
-                                value: "#222121", 
+                                value: "#222121",
                             },
                         },
                         fpsLimit: 120,
@@ -194,8 +220,7 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
                 />
             )}
             <div className="main-container">
-                {loggedInUser ? (
-                    // If loggedInUser is not null, show the StudentDashboard
+                {loggedInUser ? ( // Conditional rendering based on loggedInUser state
                     <StudentDashboard onLogout={handleLogout} />
                 ) : (
                     <>
@@ -207,12 +232,14 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
                                     placeholder="Email"
                                     value={loginEmail}
                                     onChange={(e) => setLoginEmail(e.target.value)}
+                                    required // Added required
                                 />
                                 <input
                                     type="password"
                                     placeholder="Password"
                                     value={loginPassword}
                                     onChange={(e) => setLoginPassword(e.target.value)}
+                                    required // Added required
                                 />
                                 <button className="b1" onClick={handleSignIn}>SignIn</button>
                                 {loginMessage && (
@@ -238,18 +265,21 @@ const [showSignUpForm, setShowSignUpForm] = useState(false);
                                     placeholder="Full Name"
                                     value={signUpFullname}
                                     onChange={(e) => setSignUpFullname(e.target.value)}
+                                    required // Added required
                                 />
                                 <input
                                     type="email"
                                     placeholder="Email"
                                     value={signUpEmail}
                                     onChange={(e) => setSignUpEmail(e.target.value)}
+                                    required // Added required
                                 />
                                 <input
                                     type="password"
                                     placeholder="Password"
                                     value={signUpPassword}
                                     onChange={(e) => setSignUpPassword(e.target.value)}
+                                    required // Added required
                                 />
                                 <div className="buttons">
                                     <button className="b1" onClick={handleSignUpSubmit}>Register</button>
