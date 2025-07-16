@@ -225,3 +225,60 @@ body {
   justify-content: center;
   width: 100%;
 }
+
+.dashboard-container{
+  display: flex;
+  flex-direction: column;
+  margin-left: 40px;
+  gap: 10px;
+  width: 100vw;
+  height: 100vh;
+  padding: 40px;
+  /* align-items: center;
+  justify-content: center; */
+  position: fixed;
+  background-color: rgba(255, 255, 255, 0.8);
+  opacity: 100%;
+  border-radius: 15px;
+  color: rgb(0, 0, 0);
+}
+
+.details {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  color : rgb(0, 0, 0);
+  
+}
+
+.course-list{
+  margin-top: -20px;
+}
+
+.last_buttons{
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
+  justify-content: center;
+  width: 100vw;
+  /* height: 100%; */
+}
+
+.last_buttons button.b1 {
+  width: 150px;
+  padding: 12px;
+  background-color: #000000;
+  color: #ffffff;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.last_buttons button.b1:hover {
+  background-color: #dedada;
+  color: #000000;
+}
