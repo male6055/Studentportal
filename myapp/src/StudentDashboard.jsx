@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getStudentDashboard } from './api/postapi'; // Adjust path if necessary, assuming postapi.js is in src/api
+import './App.css'; 
+import { getStudentDashboard } from './api/postapi'; // Adjust path if necessary
 
 const StudentDashboard = ({ onLogout }) => {
     const [studentData, setStudentData] = useState(null);
@@ -10,31 +11,41 @@ const StudentDashboard = ({ onLogout }) => {
         const fetchDashboardData = async () => {
             setLoading(true);
             setError(null);
+
+            const studentId = localStorage.getItem('currentStudentId'); 
+
+            if (!studentId) {
+                setError("Student not logged in. Please log in again.");
+                setLoading(false);
+                return;
+            }
+
             try {
-                const res = await getStudentDashboard();
+                const res = await getStudentDashboard(studentId);
                 setStudentData(res.data);
             } catch (err) {
-                console.error("Error fetching student dashboard:", err); // Log the full error object
+                console.error("Error fetching student dashboard:", err); // Log full error object
 
                 if (err.response) {
-                    // Server responded with a status other than 2xx
                     console.error("Response data:", err.response.data);
                     console.error("Response status:", err.response.status);
                     console.error("Response headers:", err.response.headers);
 
-                    setError(err.response.data.error || err.response.data.msg || `Server Error: ${err.response.status}`);
+                    setError(
+                        err.response.data.error ||
+                        err.response.data.msg ||
+                        `Server Error: ${err.response.status}`
+                    );
 
-                    // Specifically check for authentication/authorization errors
-                    if (err.response.status === 401 || err.response.status === 403) {
-                        console.log("Authentication failed, logging out...");
-                        onLogout(); // Call the logout function passed from App.jsx
-                    }
+                    // --- JWT-related logic (commented out) ---
+                    // if (err.response.status === 401 || err.response.status === 403) {
+                    //     console.log("Authentication failed, logging out...");
+                    //     onLogout(); // Force logout on token failure
+                    // }
                 } else if (err.request) {
-                    // Request was made but no response received (e.g., network down, CORS issue)
                     console.error("No response received:", err.request);
                     setError("Network Error: Could not connect to the server. Please check your connection.");
                 } else {
-                    // Something else happened in setting up the request
                     console.error("Request setup error:", err.message);
                     setError("An unexpected error occurred while making the request.");
                 }
@@ -44,7 +55,7 @@ const StudentDashboard = ({ onLogout }) => {
         };
 
         fetchDashboardData();
-    }, [onLogout]); // Dependency array includes onLogout
+    }, [onLogout]);
 
     if (loading) {
         return (
@@ -74,11 +85,12 @@ const StudentDashboard = ({ onLogout }) => {
 
     return (
         <div className="dashboard-container">
-            <h2 className="dashboard-title">Student Portal</h2>
             <div className="student-info">
-                <p><strong>Welcome, {studentData.fullname}!</strong></p>
-                <p>Student ID: {studentData.stdid}</p>
-                <p>Email: {studentData.email}</p>
+                <h1><strong>Welcome, {studentData.fullname}!</strong></h1>
+                <div className='details'>
+                    <p>Student ID: {studentData.stdid}</p>
+                    <p>Email: {studentData.email}</p>
+                </div>
             </div>
 
             <h3 className="courses-title">Your Enrolled Courses:</h3>
@@ -95,7 +107,11 @@ const StudentDashboard = ({ onLogout }) => {
                 <p className="no-courses-message">You are not currently enrolled in any courses.</p>
             )}
 
-            <button className="b1 logout-button" onClick={onLogout}>Logout</button>
+            <div className='last_buttons'>
+                <button className="b1 logout-button" onClick={onLogout}>Add Course</button>
+                <button className="b1 logout-button" onClick={onLogout}>Delete Course</button>
+                <button className="b1 logout-button" onClick={onLogout}>Logout</button>
+            </div>
         </div>
     );
 };
