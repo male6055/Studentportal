@@ -221,7 +221,7 @@ def add_student_course(stdid):
 
 # deleting a course:
 @app.route('/students/<int:stdid>/courses/<int:courseId>', methods=['DELETE'])
-def delete_student_course(stdid, courseId): # <--- Corrected function signature
+def delete_student_course(stdid, courseId):
     conn = None
     try:
         conn = connectionstring()
@@ -254,9 +254,6 @@ def delete_student_course(stdid, courseId): # <--- Corrected function signature
 @app.route('/students/<int:stdid>/dashboard', methods=['GET'])
 # @jwt_required()  # Disabled
 def get_student_dashboard_info(stdid):
-    """
-    Fetches hardcoded student info and course details (JWT removed).
-    """
     # current_student_id = get_jwt_identity()  # JWT disabled
     current_student_id = stdid
     conn = None
