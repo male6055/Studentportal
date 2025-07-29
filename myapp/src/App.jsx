@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { getpost, loginUser, addStudent } from "./api/postapi";
+import { loginUser, addStudent } from "./api/postapi";
 import StudentDashboard from "./StudentDashboard"; // Ensure correct casing and path
 import "./App.css";
 
@@ -47,11 +47,6 @@ const App = () => {
                 localStorage.removeItem('currentUser');
             }
         } else if (storedStudentId && !storedUserJson) {
-            // If only stdid is stored, but not the full user object,
-            // you might want to fetch full user details here if needed for display
-            // For now, we'll just set isAuthenticated based on stdid
-            // For this specific setup, we need the full user object for StudentDashboard
-            // So, if only stdid is present, we treat it as not logged in fully.
             console.log("App: Only stdid found, but no full user object. Treating as not logged in.");
             localStorage.removeItem('currentStudentId'); // Clear incomplete data
         }
