@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import { loginUser, addStudent } from "./api/postapi";
-import StudentDashboard from "./StudentDashboard"; // Ensure correct casing and path
+import StudentDashboard from "./StudentDashboard"; 
 import "./App.css";
 
 const App = () => {
@@ -20,13 +20,13 @@ const App = () => {
     }, []);
 
     const particlesLoaded = (container) => {
-        // console.log(container);
+         console.log(container);
     };
 
-    // --- EFFECT TO CHECK LOCAL STORAGE ON INITIAL LOAD ---
+    
     useEffect(() => {
         const storedStudentId = localStorage.getItem('currentStudentId');
-        const storedUserJson = localStorage.getItem('currentUser'); // Optional: if you store full user object
+        const storedUserJson = localStorage.getItem('currentUser'); 
 
         if (storedStudentId && storedUserJson) {
             try {
@@ -34,7 +34,7 @@ const App = () => {
                 // Basic validation to ensure it's a valid user object
                 if (user && user.stdid === parseInt(storedStudentId)) {
                     setLoggedInUser(user);
-                    //console.log("App: Restored user from localStorage:", user);
+                    
                 } else {
                     // Mismatch or invalid stored user, clear it
                     localStorage.removeItem('currentStudentId');
@@ -52,7 +52,7 @@ const App = () => {
         }
     }, []);
 
-    // --- Login State and Handlers ---
+    //Login State and Handlers 
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [loginMessage, setLoginMessage] = useState('');
@@ -227,14 +227,14 @@ const App = () => {
                                     placeholder="Email"
                                     value={loginEmail}
                                     onChange={(e) => setLoginEmail(e.target.value)}
-                                    required // Added required
+                                    required 
                                 />
                                 <input
                                     type="password"
                                     placeholder="Password"
                                     value={loginPassword}
                                     onChange={(e) => setLoginPassword(e.target.value)}
-                                    required // Added required
+                                    required 
                                 />
                                 <button className="b1" onClick={handleSignIn}>SignIn</button>
                                 {loginMessage && (
@@ -260,21 +260,21 @@ const App = () => {
                                     placeholder="Full Name"
                                     value={signUpFullname}
                                     onChange={(e) => setSignUpFullname(e.target.value)}
-                                    required // Added required
+                                    required 
                                 />
                                 <input
                                     type="email"
                                     placeholder="Email"
                                     value={signUpEmail}
                                     onChange={(e) => setSignUpEmail(e.target.value)}
-                                    required // Added required
+                                    required 
                                 />
                                 <input
                                     type="password"
                                     placeholder="Password"
                                     value={signUpPassword}
                                     onChange={(e) => setSignUpPassword(e.target.value)}
-                                    required // Added required
+                                    required 
                                 />
                                 <div className="buttons">
                                     <button className="b1" onClick={handleSignUpSubmit}>Register</button>
@@ -292,6 +292,7 @@ const App = () => {
                     </>
                 )}
             </div>
+
         </>
     );
 };

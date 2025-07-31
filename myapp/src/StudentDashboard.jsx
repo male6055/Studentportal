@@ -7,9 +7,6 @@ const StudentDashboard = ({ onLogout }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [courseToDelete, setCourseToDelete] = useState(null);
-
     const [newCourseCode, setNewCourseCode] = useState('');
     const [newCourseName, setNewCourseName] = useState('');
     const [newCourseDescription, setNewCourseDescription] = useState('');
@@ -88,18 +85,6 @@ const StudentDashboard = ({ onLogout }) => {
         }
     };
 
-    const confirmDelete = async () => {
-        try {
-            await DeleteCourse(localStorage.getItem("currentStudentId"), courseToDelete.CourseId);
-            setShowDeleteModal(false);
-            setCourseToDelete(null);
-            fetchDashboardData();
-        } catch (err) {
-            console.error("Error deleting course:", err);
-            alert("Failed to delete course.");
-        }
-    };
-
     if (loading) {
         return <div className="dashboard-container"><p>Loading student dashboard...</p></div>;
     }
@@ -114,20 +99,6 @@ const StudentDashboard = ({ onLogout }) => {
 
     return (
         <div className="dashboard-container">
-            {showDeleteModal && courseToDelete && (
-                <div className="modal-overlay">
-                    <div className="modal-box">
-                        <h3>Confirm Deletion</h3>
-                        <p>Are you sure you want to delete the following course?</p>
-                        <p><strong>{courseToDelete.coursecode}: {courseToDelete.coursename}</strong></p>
-                        <p>{courseToDelete.description}</p>
-                        <div className="modal-buttons">
-                            <button className="b1" onClick={confirmDelete}>Yes, Delete</button>
-                            <button className="b2" onClick={() => { setShowDeleteModal(false); setCourseToDelete(null); }}>Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <div className="student-info">
                 <h1><strong>Welcome, {studentData.fullname}!</strong></h1>
@@ -147,11 +118,19 @@ const StudentDashboard = ({ onLogout }) => {
                                 <p className="course-description">{course.description}</p>
                                 <button
                                     className="delete-button"
-                                    onClick={() => {
-                                        setCourseToDelete(course);
-                                        setShowDeleteModal(true);
+                                    onClick={async () => {
+                                        try {
+                                            await DeleteCourse(localStorage.getItem("currentStudentId"), course.CourseId);
+                                            fetchDashboardData();
+                                        } catch (err) {
+                                            console.error("Error deleting course:", err);
+                                            alert("Failed to delete course.");
+                                        }
                                     }}
-                                >Delete</button>
+                                >
+                                    Delete
+                                </button>
+
                             </div>
                         </div>
                     ))}
@@ -181,6 +160,41 @@ const StudentDashboard = ({ onLogout }) => {
             <div className='last_buttons'>
                 <button className="b1 logout-button" onClick={onLogout}>Logout</button>
             </div>
+
+            <footer className="site-footer">
+                <div className="footer-content">
+                    <div className="footer-section about">
+                        <h3>About Us</h3>
+                        <p>We are a passionate team dedicated to creating amazing web experiences. Our mission is to deliver high-quality, user-friendly solutions.</p>
+                    </div>
+
+                    <div className="footer-section links">
+                        <h3>Quick Links</h3>
+                        <ul>
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                            <li><a href="#privacy">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+
+                    <div className="footer-section social">
+                        <h3>Follow Us</h3>
+                        <div className="social-icons">
+                            <a href="#" className="social-icon">👍</a> {/* Facebook/LinkedIn */}
+                            <a href="#" className="social-icon">🐦</a> {/* Twitter/X */}
+                            <a href="#" className="social-icon">📸</a> {/* Instagram */}
+                            <a href="#" className="social-icon">▶️</a> {/* YouTube */}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="footer-bottom">
+                    &copy; 2025 YourCompany. All rights reserved.
+                </div>
+            </footer>
+            
+
         </div>
     );
 };
