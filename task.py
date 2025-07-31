@@ -1,36 +1,11 @@
 from flask import Flask, jsonify, request
-# from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity
 from flask_cors import CORS
 import pyodbc
-import logging # Add this at the top
+import logging
 
 app = Flask(__name__)
 CORS(app)
 
-# JWT Config (disabled)
-# app.config["JWT_SECRET_KEY"] = "test"
-# jwt = JWTManager(app)
-
-# JWT error handlers (disabled)
-# @jwt.unauthorized_loader
-# def unauthorized_response(callback):
-#     print("DEBUG: JWT unauthorized_loader triggered", flush=True)
-#     return jsonify({"msg": "Missing Authorization Header or Token"}), 401
-
-# @jwt.invalid_token_loader
-# def invalid_token_response(callback):
-#     print("DEBUG: JWT invalid_token_loader triggered", flush=True)
-#     return jsonify({"msg": "Signature verification failed"}), 403
-
-# @jwt.expired_token_loader
-# def expired_token_response(callback):
-#     print("DEBUG: JWT expired_token_loader triggered", flush=True)
-#     return jsonify({"msg": "Token has expired"}), 401
-
-# @jwt.revoked_token_loader
-# def revoked_token_response(callback):
-#     print("DEBUG: JWT revoked_token_loader triggered", flush=True)
-#     return jsonify({"msg": "Token has been revoked"}), 401
 
 app.config['CONNECTIONSTRING'] = (
     "DRIVER={SQL Server};"
